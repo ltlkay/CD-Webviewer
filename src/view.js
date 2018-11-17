@@ -819,7 +819,7 @@ grid.getColor = function(value) {
 	for (var i = 0; i < grid.palette.length; i++) {
 		var mmax = grid.palette[i][0];
 		
-		if (value < mmax[0] || value > mmax[1]) continue;
+		if (value < mmax[0] || value >= mmax[1]) continue;
 		
 		return d3.color("rgb(" + grid.palette[i][1].join(",") + ")");
 	}
