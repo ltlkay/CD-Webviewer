@@ -432,9 +432,13 @@ Viz.stats = {
 			this.time.html("Current time frame : " + t);
 		
 			var aData = Viz.Utils.map(states, function(d, i) { return { state:+i, frequency:d }; });
+			var count = 0;
 			
 			for (var i = 0; i < aData.length; i++) {
-				this.states[i].innerHTML = aData[i].state + " : " + aData[i].frequency;
+				count += aData[i].frequency;
+			}
+			for (var i = 0; i < aData.length; i++) {
+				this.states[i].innerHTML = aData[i].state + " : " + aData[i].frequency + " ( " + ((aData[i].frequency/count)*(10000/100)).toFixed(2) + "%)";
 			}
 		}
 		

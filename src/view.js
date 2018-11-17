@@ -41,8 +41,12 @@ grid.view.currentTimeFrame = 1;
 grid.view.div = grab('grid');
 grid.view.valueDisplay = grab('showValues').checked;
 grid.view.zeroDisplay = grab('showZero').checked;
+grid.view.showStats = grab('showStats').checked;
+grid.view.showStateFreq = grab('showStateFreq').checked;
+grid.view.showTransitions = grab('showTransitions').checked;
 grid.view.timeline = grab('timeline');
 grid.view.canvy = grab('canvy');
+grid.view.canvyDiv = grab('canvyDiv');
 grid.view.barHeight = 20; //pixels
 grid.view.barWidth = 15;
 grid.view.layoutColumns = 1; // columns of port layers 
@@ -58,6 +62,7 @@ SCL = grab('cellScale').value;
 grid.view.isRecording = false;
 grid.view.video = {};
 grid.view.videoOutput;
+
 
 function previousCacheTime(t){	// find most previous cache point to time t
 	var	isLastFrame = (t==(grid.model.frameCount-1));
@@ -87,6 +92,9 @@ grid.loadSimulation = function(){
 }
 
 grid.setupGrid = function(){
+	//Show canvas
+	grid.view.canvy.style.display='';
+	grid.view.canvyDiv.style.display='';
 	// Clear everything to init values
 	//grid.model.frameCount = 0; // start with frame 0
 	grid.view.currentTimeFrame = 0;
@@ -108,10 +116,9 @@ grid.setupGrid = function(){
 
 	// If only single port in single layer, disable port title bar
 	grid.view.barHeight= (grid.model.ports.length == 1 && gridData.dimZ == 1) ? 0 : 20;
-
 	var canvy = grid.view.canvy;
-	grid.view.gfx = canvy.getContext('2d');
 	
+	grid.view.gfx = canvy.getContext('2d');
 	var nGrid = gridData.dimZ*(grid.model.ports.length-skipOut);
 	
 	canvy.width = (gridData.dimX*SCL+grid.view.barWidth) * grid.view.layoutColumns - grid.view.barWidth;
@@ -124,7 +131,8 @@ grid.setupGrid = function(){
 	grid.toggleUI(true, ['precision','BtnRecord','BtnPlay', 'timelineSeek',
 						  'fixedPrecision', 'precision','loop', 'BtnRewind', 
 						  'BtnPlayBw','BtnStepBw', 'BtnStepFw','BtnLastFrame',
-						  'showValues', 'showGridOverlay', 'layoutColumns']);
+						  'showValues', 'showGridOverlay', 'layoutColumns',
+						  'showStats', 'showTransitions','showStateFreq']);
 	if(grab('showValues').checked) 		grid.toggleUI(true, ['showZero']);
 	if(grab('showGridOverlay').checked) grid.toggleUI(true, ['gridOverlayColor']);
 
@@ -152,7 +160,6 @@ grid.setupGrid = function(){
 			grab('Layer'+z+'_Port'+'out').checked = false;
 		
 	}
-	
 	//******************
 	// Finally, initialize the single view frame buffer, ready for rendering (updateGridView).
 	// This buffer will eliminate the need to rewind playback every time we change a paramter,
@@ -182,6 +189,9 @@ grid.updateGridView = function(){
 		gfx 			= grid.view.gfx,
 		vDisplay		= grid.view.valueDisplay,
 		zeroDisplay 	= grid.view.zeroDisplay,
+		showStats       = grid.view.showStats,
+		showTransitions = grid.view.showTransitions,
+		showStateFreq   = grid.view.showStateFreq,
 		fb 				= grid.view.viewBuffer,
 		dc 				= grid.view.dataCache
 
@@ -197,7 +207,7 @@ grid.updateGridView = function(){
 
 	var layerWidth  = SCL*grid.model.dimX,	// not including port layer padding (barW)
 		layerHeight = SCL*grid.model.dimY;	// not including port title (barH)
-
+		
 	// Clear entire grid if layers need update
 	if(grid.view.layersNeedUpdate){
 		// Transparent pixels break Whammy encoder
@@ -465,6 +475,9 @@ grid.toggleGridOverlay = function(){
 	grid.updateGridView();
 	grab('gridOverlayColor').disabled = !grab('showGridOverlay').checked;
 }
+
+
+
 grid.updateGridOverlayColor = function(){
 	// Redraw the frame using the new colors
 	grid.updateGridView();
@@ -594,7 +607,8 @@ grid.recordFrames = function(){
 		grid.toggleUI(false, ['cellScale','BtnParseY','framerate','vidQual', 'showZero', 'layoutColumns',
 						    'fixedPrecision', 'precision','loop','BtnRewind','BtnStepBw','BtnPlayBw',
 						    'BtnPlay','BtnStepFw','BtnLastFrame','showValues','showGridOverlay',
-						    'gridOverlayColor', 'timelineSeek']);
+						    'gridOverlayColor', 'timelineSeek','showStats', 'showTransitions','showStateFreq']);
+							
 	}
 	else{
 		// Stop recording here. Compile the whole video.
@@ -616,7 +630,7 @@ grid.recordFrames = function(){
 		grid.toggleUI(true, ['cellScale','BtnParseY','framerate','vidQual', 'showZero', 'layoutColumns',
 						   'fixedPrecision', 'precision','loop','BtnRewind','BtnStepBw','BtnPlayBw',
 						   'BtnPlay','BtnStepFw','BtnLastFrame','showValues','showGridOverlay',
-						   'gridOverlayColor', 'timelineSeek']);
+						   'gridOverlayColor', 'timelineSeek','showStats', 'showTransitions','showStateFreq']);
 		// Disable random access and backwards playback if cache is disabled
 		if(!grid.view.CACHE_ENABLED)
 			grid.toggleUI(false, ['timelineSeek','BtnPlayBw','BtnStepBw','BtnLastFrame']);
@@ -662,7 +676,7 @@ grid.recordNextFrame = function(){
 	grid.toggleUI(true, ['cellScale','BtnParseY','framerate','vidQual', 'showZero', 'layoutColumns',
 						  'fixedPrecision', 'precision','loop','BtnRewind','BtnStepBw','BtnPlayBw',
 						  'BtnPlay','BtnStepFw','BtnLastFrame','showValues','showGridOverlay',
-						  'gridOverlayColor', 'timelineSeek']);
+						  'gridOverlayColor', 'timelineSeek','showStats', 'showTransitions','showStateFreq']);
 	// Disable random access and backwards playback if cache is disabled
 	if(!grid.view.CACHE_ENABLED)
 		grid.toggleUI(false, ['timelineSeek','BtnPlayBw','BtnStepBw','BtnLastFrame']);
@@ -713,6 +727,8 @@ grid.seekTimeline = function(){
 		}
 	}
 }
+
+
 
 grid.toggleValueDisplay = function(){
 	this.view.valueDisplay = !this.view.valueDisplay;
@@ -792,8 +808,8 @@ grid.initialView = function(){
 grid.initialView();
 
 // View main
-grid.viewMain = function(){
-	grid.setupGrid();	
+grid.viewMain = function(){	
+	grid.setupGrid();
 	grid.setupCharts();
 	grid.updateGridView();
 }
@@ -827,18 +843,18 @@ grid.toggleCharts = function(z, port) {
 	var fb = grid.view.viewBuffer;
 	
 	Viz.data.Initialize(z, port, track);
-	
-	charts.states = Viz.charting.BuildStatesChart(grab('chartsDiv'), "state", [70, 40, 20, 50]);
-	charts.transitions = Viz.charting.BuildTransitionsChart(grab('chartsDiv'), "activity", [50, 50, 50, 50]);
-	stats = Viz.stats.Build(grab('chartsDiv'), Viz.data);
+	if(grab('showStateFreq').checked) charts.states = Viz.charting.BuildStatesChart(grab('chartsDiv'), "state", [70, 40, 20, 50]);
+	if(grab('showTransitions').checked) charts.transitions = Viz.charting.BuildTransitionsChart(grab('chartsDiv'), "activity", [50, 50, 50, 50]);
+	if(grab('showStats').checked) stats = Viz.stats.Build(grab('chartsDiv'), Viz.data);
+	grid.updateGridView();
 }
 
 grid.updateCharts = function(t, fb) {	
 	Viz.data.UpdateTime(t, fb);
 	
-	charts.states.Update(Viz.data.StatesAsArray());
-	charts.transitions.Update(Viz.data.TransitionAsArray());
-	stats.Update(Viz.data.t, Viz.data.states);
+	if(grab('showStateFreq').checked) charts.states.Update(Viz.data.StatesAsArray());
+	if(grab('showTransitions').checked) charts.transitions.Update(Viz.data.TransitionAsArray());
+	if(grab('showStats').checked) stats.Update(Viz.data.t, Viz.data.states);
 }
 
 function grab(id)	{return document.getElementById(id);}
