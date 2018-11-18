@@ -62,7 +62,7 @@ SCL = grab('cellScale').value;
 grid.view.isRecording = false;
 grid.view.video = {};
 grid.view.videoOutput;
-
+AxisCanvas=1;
 
 function previousCacheTime(t){	// find most previous cache point to time t
 	var	isLastFrame = (t==(grid.model.frameCount-1));
@@ -74,11 +74,14 @@ function nearestCacheTime(t){	// find nearest cache point to time t (upper bound
 }
 
 
+
+
 grid.loadSimulation = function(){
 	if(!inp.logLoaded){
 		alert("Please select a simulation log.")
 		return;
 	}
+	AxisCanvas=1;
 	grid.pausePlayback();
 	grab('BtnParseY').style.background = 'rgba(35,112,77, 0.5)';
 	grab('BtnParseY').disabled = true;
@@ -121,8 +124,8 @@ grid.setupGrid = function(){
 	grid.view.gfx = canvy.getContext('2d');
 	var nGrid = gridData.dimZ*(grid.model.ports.length-skipOut);
 	
-	canvy.width = (gridData.dimX*SCL+grid.view.barWidth) * grid.view.layoutColumns - grid.view.barWidth;
-	canvy.height= (gridData.dimY*SCL+grid.view.barHeight)* Math.ceil(nGrid/grid.view.layoutColumns);
+	canvy.width = (gridData.dimX*SCL+grid.view.barWidth) * grid.view.layoutColumns - grid.view.barWidth+40;
+	canvy.height= (gridData.dimY*SCL+grid.view.barHeight)* Math.ceil(nGrid/grid.view.layoutColumns)+40;
   
 	// Signal that layers need to be redrawn
 	grid.view.layersNeedUpdate = true;
@@ -215,7 +218,7 @@ grid.updateGridView = function(){
 		
 		// Use canvas div bg color instead
 		gfx.fillStyle = window.getComputedStyle(canvyDiv).getPropertyValue('background-color');
-		gfx.fillRect(0, 0,canvy.width,canvy.height);
+		gfx.fillRect(0,0,canvy.width,canvy.height);
 	}
 	
 	// Is this frame cached? (i.e. last or multiple of caching period)
@@ -380,25 +383,40 @@ grid.updateGridView = function(){
 				gfx.shadowBlur = 0;
 				gfx.strokeStyle = gridOverlayColor;
 				gfx.lineWidth = grid.view.gridOverlayWidth;
+				var count =grid.model.dimY-1;
 				// horizontal grid lines
 				for(var y=grid.model.dimY+1; y-->0;){
 					// See this for why 0.5: http://goo.gl/EpuqLl
 					gfx.beginPath();
-					gfx.moveTo(layerPosX, 			 layerPosY+y*SCL+(y!=grid.model.dimY?0.5:-0.5));
+					gfx.moveTo(layerPosX,layerPosY+y*SCL+(y!=grid.model.dimY?0.5:-0.5));
 					gfx.lineTo(layerPosX+layerWidth, layerPosY+y*SCL+(y!=grid.model.dimY?0.5:-0.5));
 					gfx.closePath();
 					gfx.stroke();
+					if (y>0 && AxisCanvas==1)  {
+						gfx.fillStyle = "white";
+						gfx.fillText(count,canvy.width-26, layerPosY+y*SCL+(y!=grid.model.dimY?0.5:-0.5)-16);
+					};
+					count--;
 				}
 				// vertical grid lines
+				count =grid.model.dimX-1;
 				for(var x=grid.model.dimX+1; x-->0;){
 					gfx.beginPath();
 					gfx.moveTo(layerPosX+x*SCL+(x!=grid.model.dimX?0.5:-0.5), layerPosY);
 					gfx.lineTo(layerPosX+x*SCL+(x!=grid.model.dimX?0.5:-0.5), layerPosY+layerHeight);
 					gfx.closePath();
 					gfx.stroke();
+					if (x>0 && AxisCanvas==1) {
+						gfx.fillStyle = "white";
+						gfx.fillText(count,layerPosX+x*SCL+(x!=grid.model.dimX?0.5:-0.5)-17, canvy.height-26);
+					};
+					count--;
 				}
+				AxisCanvas =0;
 			}
 		}
+		gfx.fillText("X",canvy.width/2-grid.model.dimX,canvy.height-2);
+		gfx.fillText("Y",canvy.width-6,canvy.height/2-grid.model.dimY+4);
 	}
 	// Layer layout and title bars have been updated
 	grid.view.layersNeedUpdate = false;
@@ -858,3 +876,5 @@ grid.updateCharts = function(t, fb) {
 }
 
 function grab(id)	{return document.getElementById(id);}
+
+
