@@ -415,8 +415,10 @@ grid.updateGridView = function(){
 				AxisCanvas =0;
 			}
 		}
+	if(AxisCanvas) {
 		gfx.fillText("X",canvy.width/2-grid.model.dimX,canvy.height-2);
 		gfx.fillText("Y",canvy.width-6,canvy.height/2-grid.model.dimY+4);
+		}
 	}
 	// Layer layout and title bars have been updated
 	grid.view.layersNeedUpdate = false;
@@ -877,4 +879,34 @@ grid.updateCharts = function(t, fb) {
 
 function grab(id)	{return document.getElementById(id);}
 
+
+	  
+function getMousePos(canvas, event) {
+	var rect = canvas.getBoundingClientRect();
+	return {
+		x: Math.round(event.clientX - rect.left ),
+		y: Math.round(event.clientY - rect.top)
+	};
+}
+
+var canvas = grid.view.canvy;	
+var context = canvy.getContext('2d');
+canvas.addEventListener('mousemove', function(event) {
+		var ToolTip = grab('tip'); ToolTip.innerHTML='';
+        var mousePos = getMousePos(canvas, event);
+		
+		var height = Math.round((canvy.height-40)/grid.model.dimY);
+		var width = Math.round((canvy.width-40)/grid.model.dimX);
+		
+		var cellX=Math.round((mousePos.x-5)/width);
+		var cellY=Math.round(mousePos.y/height);
+		
+		if (cellY > grid.model.dimY-1) cellY=grid.model.dimY-1;
+		if (cellX > grid.model.dimX-1) cellX=grid.model.dimX-1;
+		
+		var message = 'Pos:' + cellX +',' + cellY;
+		ToolTip.innerHTML += message;
+		ToolTip.style.left=(event.pageX)-20 + 'px';
+		ToolTip.style.top=(event.pageY)+23 + 'px';
+      }, false);
 

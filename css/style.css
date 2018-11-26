@@ -484,6 +484,12 @@ html[data-UA*='Mac OS'] #gridOverlayColor
 	border-radius: 3px;
 }
 
+#tip {
+  position: absolute;
+  background: white;
+  border: 1px solid blue;
+}
+
 /* Implement the color pallete as a set of CSS classes */
 input[type=number]{
 	line-height: 1.1;
@@ -562,3 +568,4 @@ input[type="checkbox"], input[type="radio"]{
 .label.medium {
 	width:100px;
 }
+
