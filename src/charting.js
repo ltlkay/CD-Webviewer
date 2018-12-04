@@ -439,11 +439,11 @@ Viz.stats = {
 			}
 		
 			for (var i = 0; i < aData.length; i++) {
-				this.states[i].innerHTML = aData[i].state + " : " + aData[i].frequency + " ( " + ((aData[i].frequency/count)*(10000/100)).toFixed(2) + "%)";
+				var percentage = ((aData[i].frequency/count)*(10000/100)).toFixed(2);
+				if (count ==0) percentage = 0..toFixed(2);
+				this.states[i].innerHTML = aData[i].state + " : " + aData[i].frequency + "  (" + percentage + "%)";
 			}
 		}
-		
-		
 		return stats;
 	}
 };
