@@ -56,8 +56,6 @@ grid.view.frameTimer = 0;
 grid.view.gfx;
 grid.view.redrawRequested = true;
 SCL = grab('cellScale').value;
-grid.view.video = {};
-grid.view.videoOutput;
 AxisCanvas=1;
 
 function previousCacheTime(t){	// find most previous cache point to time t

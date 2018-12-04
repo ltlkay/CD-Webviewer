@@ -12,6 +12,8 @@
 
  
 grid.view.isRecording = false;
+grid.view.video = {};
+grid.view.videoOutput;
 
 grid.nextFrame = function(){
 	if(grid.view.currentTimeFrame<grid.model.frameCount-1){
@@ -147,8 +149,8 @@ grid.recordFrames = function(){
 		grab('videoDownloadLink').href = vidURL;
 		grab('videoDownloadLink').download = grid.model.name+'.webm';
 		grab('videoViewLink').onclick = function(){
-			window.open(vidURL,"_blank","width="+grid.view.canvy.width+",height="+grid.view.canvy.height);
-			return;
+			var watch = window.open(vidURL,"_blank","width="+grid.view.canvy.width+",height="+grid.view.canvy.height);
+			return; 
 		}
 
 		// renable the timeline buttons
@@ -185,9 +187,10 @@ grid.recordNextFrame = function(){
 	grab('videoDownloadLink').href = vidURL;
 	grab('videoDownloadLink').download = grid.model.name+'.webm';
 	grab('videoViewLink').onclick = function(){
-		window.open(vidURL,"_blank","width="+grid.view.canvy.width+",height="+grid.view.canvy.height);
-		return;
+		var watch = window.open(vidURL,"_blank","width="+grid.view.canvy.width+",height="+grid.view.canvy.height);
+		return; 
 	}
+	
 
 	// renable the timeline buttons
 	grid.toggleUI(true);
